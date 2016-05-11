@@ -86,12 +86,11 @@ func (p *Progress) AddBar(total int) *Bar {
 // Listen listens for updates and renders the progress bars
 func (p *Progress) Listen() {
 	p.lw.Out = p.Out
-	stopChan := p.stopChan
 	ticker := time.NewTicker(p.RefreshInterval)
-	defer ticker.Stop()
 	for {
 		select {
-		case <- stopChan:
+		case <-p.stopChan:
+			ticker.Stop()
 			return
 		case <- ticker.C:
 			p.mtx.RLock()
