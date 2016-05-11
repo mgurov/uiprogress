@@ -3,24 +3,9 @@ package uiprogress_test
 import (
 	"github.com/gosuri/uiprogress"
 	"time"
-	"os"
 	"testing"
+	"sync"
 )
-
-func ExampleStoppingPrintout() {
-	progress := uiprogress.New()            // start rendering
-	progress.RefreshInterval = time.Millisecond * 10
-	progress.Out = os.Stdout
-	progress.Start()
-	bar := progress.AddBar(1) // Add a new bar
-	bar.Incr()
-	time.Sleep(time.Millisecond * 15)
-	//progress.Bars = nil
-	progress.Stop()
-	time.Sleep(1 * time.Second)
-	// Output: [====================================================================]
-
-}
 
 func TestStoppingPrintout(t *testing.T) {
 
@@ -36,16 +21,25 @@ func TestStoppingPrintout(t *testing.T) {
 	progress.Stop()
 	time.Sleep(1 * time.Second)
 
-	if 1 != counter.Count {
-		t.Errorf("Expected count 1, actual: %d", counter.Count)
+	if 1 != counter.Count() {
+		t.Errorf("Expected count 1, actual: %d", counter.Count())
 	}
 }
 
 type countingWriter struct {
-	Count int
+	count int
+	mtx   sync.RWMutex
 }
 
 func (cw *countingWriter) Write(p []byte) (n int, err error) {
-	cw.Count ++
+	cw.mtx.Lock()
+	cw.count += 1
+	cw.mtx.Unlock()
 	return len(p), nil
+}
+
+func (cw *countingWriter) Count() int {
+	cw.mtx.RLock()
+	defer cw.mtx.RUnlock()
+	return cw.count
 }
