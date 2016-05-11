@@ -3,14 +3,20 @@ package uiprogress_test
 import (
 	"github.com/gosuri/uiprogress"
 	"time"
+	"os"
 )
 
 func ExampleStoppingPrintout() {
-	uiprogress.Start()            // start rendering
-	bar := uiprogress.AddBar(1) // Add a new bar
+	progress := uiprogress.New()            // start rendering
+	progress.RefreshInterval = time.Millisecond * 10
+	progress.Out = os.Stdout
+	progress.Start()
+	bar := progress.AddBar(1) // Add a new bar
 	bar.Incr()
-	uiprogress.Stop()
+	time.Sleep(time.Millisecond * 15)
+	//progress.Bars = nil
+	progress.Stop()
 	time.Sleep(1 * time.Second)
-	// Output: blah
+	// Output: [====================================================================]
 
 }
