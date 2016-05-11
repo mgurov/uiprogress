@@ -85,8 +85,11 @@ func (p *Progress) AddBar(total int) *Bar {
 
 // Listen listens for updates and renders the progress bars
 func (p *Progress) Listen() {
+	p.listen(p.stopChan)
+}
+
+func (p *Progress) listen(stopChan chan struct{}) {
 	p.lw.Out = p.Out
-	stopChan := p.stopChan
 	ticker := time.NewTicker(p.RefreshInterval)
 	for {
 		select {
@@ -109,7 +112,7 @@ func (p *Progress) Start() {
 	if p.stopChan == nil {
 		p.stopChan = make(chan struct{})
 	}
-	go p.Listen()
+	go p.listen(p.stopChan)
 }
 
 // Stop stops listening
