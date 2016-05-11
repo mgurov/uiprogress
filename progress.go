@@ -86,18 +86,19 @@ func (p *Progress) AddBar(total int) *Bar {
 // Listen listens for updates and renders the progress bars
 func (p *Progress) Listen() {
 	p.lw.Out = p.Out
+	stopChan := p.stopChan
 	for {
 		select {
-		case <-p.stopChan:
+		case <- stopChan:
 			return
 		default:
-			time.Sleep(p.RefreshInterval)
 			p.mtx.RLock()
 			for _, bar := range p.Bars {
 				fmt.Fprintln(p.lw, bar.String())
 			}
 			p.lw.Flush()
 			p.mtx.RUnlock()
+			time.Sleep(p.RefreshInterval)
 		}
 	}
 }
