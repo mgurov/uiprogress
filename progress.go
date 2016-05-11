@@ -87,18 +87,19 @@ func (p *Progress) AddBar(total int) *Bar {
 func (p *Progress) Listen() {
 	p.lw.Out = p.Out
 	stopChan := p.stopChan
+	ticker := time.NewTicker(p.RefreshInterval)
+	defer ticker.Stop()
 	for {
 		select {
 		case <- stopChan:
 			return
-		default:
+		case <- ticker.C:
 			p.mtx.RLock()
 			for _, bar := range p.Bars {
 				fmt.Fprintln(p.lw, bar.String())
 			}
 			p.lw.Flush()
 			p.mtx.RUnlock()
-			time.Sleep(p.RefreshInterval)
 		}
 	}
 }
