@@ -109,16 +109,21 @@ func (p *Progress) listen(stopChan chan struct{}) {
 
 // Start starts the rendering the progress of progress bars. It listens for updates using `bar.Set(n)` and new bars when added using `AddBar`
 func (p *Progress) Start() {
+	p.mtx.Lock()
 	if p.stopChan == nil {
 		p.stopChan = make(chan struct{})
 	}
-	go p.listen(p.stopChan)
+	stopChan := p.stopChan
+	p.mtx.Unlock()
+	go p.listen(stopChan)
 }
 
 // Stop stops listening
 func (p *Progress) Stop() {
+	p.mtx.Lock()
 	close(p.stopChan)
 	p.stopChan = nil
+	p.mtx.Unlock()
 }
 
 // Bypass returns a writer which allows non-buffered data to be written to the underlying output
