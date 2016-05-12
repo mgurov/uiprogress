@@ -85,7 +85,7 @@ func (p *Progress) AddBar(total int) *Bar {
 
 // Listen listens for updates and renders the progress bars
 func (p *Progress) Listen() {
-	p.listen(p.stopChan)
+	panic("debugging")
 }
 
 func (p *Progress) listen(stopChan chan struct{}) {
